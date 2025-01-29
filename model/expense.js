@@ -5,15 +5,17 @@ const moment = require('moment-timezone')
 class Expense {
     constructor(
         id,
+        type, // out or in
         user,
         amount,
         description,
         timestamp,
         category,
         isTemplate,
-        ref,
+        ref
     ) {
         this.id = id
+        this.type = type
         this.user = user
         this.amount = amount
         this.description = description
@@ -25,15 +27,13 @@ class Expense {
 
     toString(noTimestamp, tz) {
         let d = moment.tz(this.timestamp, tz)
-        return `${!noTimestamp ? d.format('YYYY/M/D') + ' – ' : ''}${
-            this.amount
-        } - ${this.description} ${this.category ? ' - ' + this.category : ''} ${
-            this.ref ? '(🔁)' : ''
-        }`
-        .replaceAll('_', '\\_')
-        .replaceAll('*', '\\*')
-        .replaceAll('[', '\\[')
-        .replaceAll('`', '\\`')
+        return `${!noTimestamp ? d.format('YYYY/M/D') + ' – ' : ''}${this.amount} - ${this.description} ${
+            this.category ? ' - ' + this.category : ''
+        } ${this.ref ? '(🔁)' : ''}`
+            .replaceAll('_', '\\_')
+            .replaceAll('*', '\\*')
+            .replaceAll('[', '\\[')
+            .replaceAll('`', '\\`')
     }
 }
 

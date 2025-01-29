@@ -16,7 +16,11 @@ class ExpensesService {
         if (!user) throw new Error('user missing')
 
         const userTz = await this.keyValueService.getUserTz(user)
-        const data = await this.db.expenses().find(ExpensesService._buildQuery(user, month, category, date, userTz)).sort({ timestamp: 1 }).toArray()
+        const data = await this.db
+            .expenses()
+            .find(ExpensesService._buildQuery(user, month, category, date, userTz))
+            .sort({ timestamp: 1 })
+            .toArray()
         return data.map(ExpensesService._mapExpense)
     }
 
@@ -26,9 +30,7 @@ class ExpensesService {
     }
 
     async count() {
-        return await this.db
-            .expenses()
-            .estimatedDocumentCount()
+        return await this.db.expenses().estimatedDocumentCount()
     }
 
     async countCategories() {
@@ -60,10 +62,12 @@ class ExpensesService {
         const query = ExpensesService._buildQuery(user, month, category, date, userTz)
         delete query.category
 
-        const data = (await this.db
-            .expenses()
-            .aggregate([{ $match: query }, { $group: { _id: '$category', total: { $sum: '$amount' } } }])
-            .toArray())
+        const data = (
+            await this.db
+                .expenses()
+                .aggregate([{ $match: query }, { $group: { _id: '$category', total: { $sum: '$amount' } } }])
+                .toArray()
+        )
             .filter((e) => !category || e._id === category)
             .map((e) => ({
                 ...e,
@@ -79,6 +83,7 @@ class ExpensesService {
         if (!expense.user) throw new Error('user missing')
 
         return await this.db.expenses().insertOne({
+            type: expense.type,
             user: expense.user,
             amount: expense.amount,
             description: expense.description,
@@ -94,6 +99,7 @@ class ExpensesService {
 
         return await this.db.expenses().insertMany(
             expenses.map((e) => ({
+                type: e.type,
                 user: e.user,
                 amount: e.amount,
                 description: e.description,
@@ -119,18 +125,12 @@ class ExpensesService {
 
     // TODO: build more specific methods instead
     async findRaw(query, options, map = true) {
-        const data = await this.db
-            .expenses()
-            .find(query, options)
-            .sort({ timestamp: 1 })
-            .toArray()
+        const data = await this.db.expenses().find(query, options).sort({ timestamp: 1 }).toArray()
         return map ? data.map(ExpensesService._mapExpense) : data
     }
 
     async countRaw(query, options) {
-        return await this.db
-            .expenses()
-            .countDocuments(query, options)
+        return await this.db.expenses().countDocuments(query, options)
     }
 
     async sumTotal() {
@@ -184,7 +184,7 @@ class ExpensesService {
         if (date) {
             const from = moment.tz(date, userTz).startOf('day')
             const to = from.clone().endOf('day')
-            query.timestamp =  {$gte: from.toDate(), $lt: to.toDate() }
+            query.timestamp = { $gte: from.toDate(), $lt: to.toDate() }
         }
 
         return query
@@ -193,6 +193,7 @@ class ExpensesService {
     static _mapExpense(dbObj) {
         return new Expense(
             dbObj._id,
+            dbObj.type,
             dbObj.user,
             dbObj.amount.toFixed(2),
             dbObj.description,

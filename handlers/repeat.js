@@ -30,7 +30,7 @@ function onRepeat(bot) {
 
         try {
             await expenseService.insert(
-                new Expense(null, msg.chat.id, amount, description, new Date(msg.date * 1000), category, true)
+                new Expense(null, 'in', msg.chat.id, amount, description, new Date(msg.date * 1000), category, true)
             )
 
             await bot.sendMessage(
