@@ -118,8 +118,8 @@ async function run() {
             })
         )
 
-        app.listen(cfg.PORT, cfg.BIND_IP4, () => {
-            console.log(`✅ Listening at ${cfg.BIND_IP4}:${cfg.PORT} ...`)
+        app.listen(cfg.PORT, () => {
+            console.log(`✅ Listening at ${cfg.PORT} ...`)
         })
 
         setTimeout(async () => trySelfRegister(bot, secretToken), 100)
