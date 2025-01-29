@@ -37,7 +37,7 @@ function onListMonth(bot) {
     return async function (msg, match) {
         try {
             const text = await printExpenseList(msg.chat.id, match[1], null)
-            return await sendSplit(bot, msg.chat.id, text, { parse_mode: 'HTML' })
+            return await sendSplit(bot, msg.chat.id, text, { parse_mode: 'Markdown' })
         } catch (e) {
             console.error(`Failed to list monthly expenses for uer ${msg.chat.id}: ${e}`)
             await bot.sendMessage(msg.chat.id, 'Something went wrong, sorry 😕')
@@ -64,9 +64,7 @@ async function printExpenseList(user, month, category, date) {
         const parseMoney = (amount) => {
             return amount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
         }
-        msg += `\nTotal: <strong>${parseMoney(totalOut)} VND</strong> 💸, <strong>${parseMoney(
-            totalIn
-        )} VND</strong> 💰`
+        msg += `\nTotal: *${parseMoney(totalOut)} VND* 💸, *${parseMoney(totalIn)} VND* 💰`
         return msg
     }
     return '🙅‍♂️ No expenses for this month'

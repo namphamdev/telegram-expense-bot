@@ -33,6 +33,19 @@ class ExpensesService {
         return await this.db.expenses().estimatedDocumentCount()
     }
 
+    async groupMonth(user) {
+        const result = await this.db
+            .expenses()
+            .aggregate([
+                { $match: { user: user } },
+                { $group: { _id: { month: { $month: '$timestamp' }, year: { $year: '$timestamp' } } } },
+            ])
+            .toArray()
+        return result
+            .map((e) => `${e._id.year}-${e._id.month.toString().padStart(2, '0')}`)
+            .sort((a, b) => b.localeCompare(a))
+    }
+
     async countCategories() {
         const result = await this.db
             .expenses()
@@ -55,7 +68,7 @@ class ExpensesService {
         return data.map(ExpensesService._mapExpense)
     }
 
-    async summarize(user, month, category, date) {
+    async summarize(user, month, category, date, type) {
         if (!user) throw new Error('user missing')
 
         const userTz = await this.keyValueService.getUserTz(user)
@@ -65,7 +78,10 @@ class ExpensesService {
         const data = (
             await this.db
                 .expenses()
-                .aggregate([{ $match: query }, { $group: { _id: '$category', total: { $sum: '$amount' } } }])
+                .aggregate([
+                    { $match: { ...query, type } },
+                    { $group: { _id: '$category', total: { $sum: '$amount' } } },
+                ])
                 .toArray()
         )
             .filter((e) => !category || e._id === category)

@@ -32,10 +32,16 @@ class Expense {
         let d = moment.tz(this.timestamp, tz)
         let msg = ''
         if (!noTimestamp) {
-            msg += `${d.format('DD/MM/YY') + ' – '}`
+            msg += `*${d.format('DD/MM/YY') + '* – '}`
         }
         msg +=
-            'Type: ' + (this.type === 'out' ? '💸' : '💰') + ': <strong>' + parseMoney(this.amount) + ' VND</strong>\n'
+            '*Type: ' +
+            (this.type === 'out' ? '💸' : '💰') +
+            '*: *' +
+            parseMoney(this.amount) +
+            ' VND* (' +
+            this.id +
+            ')\n'
         msg += `${this.description} ${this.category ? ' - ' + this.category : ''} ${this.ref ? '(🔁)' : ''}`
             .replaceAll('_', '\\_')
             .replaceAll('*', '\\*')

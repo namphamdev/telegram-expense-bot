@@ -4,12 +4,13 @@ const db = require('../db'),
     wrapAsync = require('../utils').wrapAsync,
     ExpensesService = require('../services/expenses')
 
-const PATTERN_DEFAULT = /^\/new$/i
+// command in/out <amount> <description> <category>
+const PATTERN_DEFAULT = /^\/(in|out)$/i
 const PATTERN_PARAMS =
-    /^\/new ((?:(?:\-?[0-9]+(?:\.[0-9]{0,2})?)|(?:[\+\-\*\/\s]))+) ([^#]+[^ #])(?: (#[a-zA-Z0-9_]+))?$/i
+    /^\/(in|out) ((?:(?:\-?[0-9]+(?:\.[0-9]{0,2})?)|(?:[\+\-\*\/\s]))+) ([^#]+[^ #])(?: (#[a-zA-Z0-9_]+))?$/i
 const PATTERN_PLAIN = /^((?:(?:\-?[0-9]+(?:\.[0-9]{0,2})?)|(?:[\+\-\*\/\s]))+) ([^#]+[^ #])(?: (#[a-zA-Z0-9_]+))?$/i
 
-const HELP_TEXT = `Sorry, your command must look like this: \`/new 1.99 Lunch\`\nOptionally you could also specify a category using a hash tag like this:\`/new 1.99 Lunch #food\`. You can also simply leave out the \`/new\` and only type \`1.99 Lunch #food.\``
+const HELP_TEXT = `Sorry, your command must look like this: \`/out 1.99 Lunch\` or \`/in 1.99 salary\`\nOptionally you could also specify a category using a hash tag like this:\`/out 1.99 Lunch #food\`. You can also simply leave out the \`/out\` or \`/in\` and only type \`1.99 Lunch #food.\``
 
 const expenseService = new ExpensesService(db)
 
@@ -21,8 +22,9 @@ function onNewDefault(bot) {
 
 function onNew(bot) {
     return async function (msg, match) {
-        const amount = ExpensesService.parseAmount(match[1])
-        const [description, category] = match.slice(2)
+        const type = match[1]
+        const amount = ExpensesService.parseAmount(match[2])
+        const [description, category] = match.slice(3)
 
         if (!amount) {
             return await bot.sendMessage(msg.chat.id, HELP_TEXT, { parse_mode: 'Markdown' })
@@ -30,7 +32,7 @@ function onNew(bot) {
 
         try {
             await expenseService.insert(
-                new Expense(null, 'in', msg.chat.id, amount, description, new Date(msg.date * 1000), category)
+                new Expense(null, type, msg.chat.id, amount, description, new Date(msg.date * 1000), category)
             )
 
             await bot.sendMessage(msg.chat.id, `✅ Added *${amount}*.`, { parse_mode: 'Markdown' })
