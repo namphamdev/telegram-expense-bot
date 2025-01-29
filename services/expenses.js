@@ -166,13 +166,9 @@ class ExpensesService {
         }
 
         if (month) {
-            const currentYear = new Date().getFullYear()
-            const currentMonth = new Date().getMonth()
-            const m = MONTHS_LOWER.indexOf(month.toLowerCase())
-            const y = currentYear - (currentMonth - m < 0)
-
-            const from = moment.tz({ y, M: m }, userTz).startOf('month')
-            const to = from.clone().endOf('month')
+            const monthValue = moment(month, 'YYYY-MM')
+            const from = monthValue.startOf('month')
+            const to = monthValue.clone().endOf('month')
 
             query.timestamp = { $lt: to.toDate(), $gte: from.toDate() }
         }
@@ -195,7 +191,7 @@ class ExpensesService {
             dbObj._id,
             dbObj.type,
             dbObj.user,
-            dbObj.amount.toFixed(2),
+            dbObj.amount.toFixed(0),
             dbObj.description,
             dbObj.timestamp,
             dbObj.category,
@@ -217,6 +213,10 @@ function tryEval(command) {
     } catch (e) {
         return null
     }
+}
+
+const parseMoney = (amount) => {
+    return amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
 module.exports = ExpensesService

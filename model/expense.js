@@ -26,14 +26,22 @@ class Expense {
     }
 
     toString(noTimestamp, tz) {
+        const parseMoney = (amount) => {
+            return amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        }
         let d = moment.tz(this.timestamp, tz)
-        return `${!noTimestamp ? d.format('YYYY/M/D') + ' – ' : ''}${this.amount} - ${this.description} ${
-            this.category ? ' - ' + this.category : ''
-        } ${this.ref ? '(🔁)' : ''}`
+        let msg = ''
+        if (!noTimestamp) {
+            msg += `${d.format('DD/MM/YY') + ' – '}`
+        }
+        msg +=
+            'Type: ' + (this.type === 'out' ? '💸' : '💰') + ': <strong>' + parseMoney(this.amount) + ' VND</strong>\n'
+        msg += `${this.description} ${this.category ? ' - ' + this.category : ''} ${this.ref ? '(🔁)' : ''}`
             .replaceAll('_', '\\_')
             .replaceAll('*', '\\*')
             .replaceAll('[', '\\[')
             .replaceAll('`', '\\`')
+        return msg
     }
 }
 

@@ -12,7 +12,6 @@ const expenseService = new ExpensesService(db)
 function register(bot, middleware) {
     console.log('✅ Registering handlers for excel ...')
     bot.on('message', (msg) => {
-        console.log(msg)
         const chatId = msg.chat.id
         if (
             msg.document &&
