@@ -4,3 +4,4 @@ recover.json
 config.json
 .yarn/*.gz
 scripts/*.csv
+.env
